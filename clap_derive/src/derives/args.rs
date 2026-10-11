@@ -594,7 +594,7 @@ pub(crate) fn gen_updater(
                     Ty::Option => quote_spanned! { kind.span()=>
                         if let Some(#field_name) = #field_name.as_mut() {
                             #updater
-                        } else {
+                        } else if #arg_matches.subcommand_name().map(<#subcmd_type as clap::Subcommand>::has_subcommand).unwrap_or(false) {
                             *#field_name = Some(<#subcmd_type as clap::FromArgMatches>::from_arg_matches_mut(
                                 #arg_matches
                             )?);

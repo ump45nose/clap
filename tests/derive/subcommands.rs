@@ -434,8 +434,14 @@ fn update_optional_subcommand_none() {
     // No subcommand before or after the update
     let mut opt = Opt::try_parse_from(["test", "--limit", "0"]).unwrap();
     assert_eq!(opt.cmd, None);
-    let err = opt.try_update_from(["test", "--limit", "1"]).unwrap_err();
-    assert_eq!(err.kind(), clap::error::ErrorKind::MissingSubcommand);
+    opt.try_update_from(["test", "--limit", "1"]).unwrap();
+    assert_eq!(
+        Opt {
+            cmd: None,
+            limit: Some(1),
+        },
+        opt
+    );
 
     // Subcommand added by the update
     let mut opt = Opt::try_parse_from(["test", "--limit", "0"]).unwrap();
