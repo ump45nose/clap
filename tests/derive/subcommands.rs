@@ -416,6 +416,40 @@ fn update_subcommands_explicit_required() {
 }
 
 #[test]
+fn update_optional_subcommand_none() {
+    #[derive(Parser, PartialEq, Eq, Debug)]
+    struct Opt {
+        #[command(subcommand)]
+        cmd: Option<Command>,
+
+        #[arg(long)]
+        limit: Option<usize>,
+    }
+
+    #[derive(Subcommand, PartialEq, Eq, Debug)]
+    enum Command {
+        Prune,
+    }
+
+    // No subcommand before or after the update
+    let mut opt = Opt::try_parse_from(["test", "--limit", "0"]).unwrap();
+    assert_eq!(opt.cmd, None);
+    let err = opt.try_update_from(["test", "--limit", "1"]).unwrap_err();
+    assert_eq!(err.kind(), clap::error::ErrorKind::MissingSubcommand);
+
+    // Subcommand added by the update
+    let mut opt = Opt::try_parse_from(["test", "--limit", "0"]).unwrap();
+    opt.try_update_from(["test", "prune"]).unwrap();
+    assert_eq!(
+        Opt {
+            cmd: Some(Command::Prune),
+            limit: Some(0),
+        },
+        opt
+    );
+}
+
+#[test]
 fn update_sub_subcommands() {
     #[derive(Parser, PartialEq, Eq, Debug)]
     enum Opt {
